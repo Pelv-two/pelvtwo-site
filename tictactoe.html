@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/Pelv-two/pelvtwo-site/refs/heads/main/icon_pl2.png" type="image/png">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            color: red;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
+        #message {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        #game {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+        .cell:hover {
+            background-color: #e0e0e0;
+        }
+        button {
+            font-family: 'Arial', cursive, sans-serif;
+            display: block;
+            background-color: #252525;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            text-decoration: none;
+            font-size: 20px;
+            margin: 10px ;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+
+        @media (hover: none) {
+            .cell:hover {
+                background-color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="message"></div>
+    <div id="game"></div>
+    <button id="singlePlayerButton">1 player</button>
+    <button id="twoPlayerButton">2 player</button>
+    <button id="resetButton">reset</button>
+
+    <script>
+        const gameBoard = document.getElementById('game');
+        const message = document.getElementById('message');
+        const resetButton = document.getElementById('resetButton');
+        const singlePlayerButton = document.getElementById('singlePlayerButton');
+        const twoPlayerButton = document.getElementById('twoPlayerButton');
+        let currentPlayer = 'X';
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let isGameActive = false;
+        let isSinglePlayer = false;
+
+        singlePlayerButton.addEventListener('click', () => {
+            isSinglePlayer = true;
+            resetGame();
+        });
+
+        twoPlayerButton.addEventListener('click', () => {
+            isSinglePlayer = false;
+            resetGame();
+        });
+
+        function createCell(index) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.addEventListener('click', () => onCellClick(index));
+            gameBoard.appendChild(cell);
+        }
+
+        function onCellClick(index) {
+            if (board[index] !== '' || !isGameActive) return;
+
+            board[index] = currentPlayer;
+            renderBoard();
+            checkForWinner();
+
+            if (isSinglePlayer && isGameActive) {
+                currentPlayer = 'O';
+                botMove();
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
+
+        function botMove() {
+            const emptyCells = board.map((cell, index) => cell === '' ? index : null).filter(index => index !== null);
+            const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            board[randomIndex] = currentPlayer;
+            renderBoard();
+            checkForWinner();
+            currentPlayer = 'X'; // Смена игрока обратно на 'X' после хода бота
+        }
+
+        function renderBoard() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach((cell, index) => {
+                cell.textContent = board[index];
+            });
+        }
+
+        function checkForWinner() {
+            const winningConditions = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    message.textContent = `${board[a]} won!🎉`;
+                    isGameActive = false;
+                    return;
+                }
+            }
+
+            if (!board.includes('')) {
+                message.textContent = 'Draw!';
+                isGameActive = false;
+            }
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            isGameActive = true;
+            currentPlayer = 'X';
+            message.textContent = '';
+            renderBoard();
+        }
+
+        resetButton.addEventListener('click', resetGame);
+
+        for (let i = 0; i < 9; i++) {
+            createCell(i);
+        }
+    </script>
+</body>
+</html>
